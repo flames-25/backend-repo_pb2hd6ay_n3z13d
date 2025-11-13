@@ -1,48 +1,58 @@
 """
-Database Schemas
+Database Schemas for Mazzura
 
-Define your MongoDB collection schemas here using Pydantic models.
-These schemas are used for data validation in your application.
-
-Each Pydantic model represents a collection in your database.
-Model name is converted to lowercase for the collection name:
-- User -> "user" collection
-- Product -> "product" collection
-- BlogPost -> "blogs" collection
+Each Pydantic model represents a collection in MongoDB. The collection name is the lowercase of the class name.
 """
 
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
-class User(BaseModel):
+class Userprofile(BaseModel):
     """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
+    Fashion DNA / Profile
+    Collection: "userprofile"
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
-    address: str = Field(..., description="Address")
-    age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
-    is_active: bool = Field(True, description="Whether user is active")
+    email: str = Field(..., description="Email address (unique)")
+    body_type: Optional[str] = Field(None, description="Body type descriptor")
+    skin_tone: Optional[str] = Field(None, description="Skin tone descriptor")
+    preferred_colors: List[str] = Field(default_factory=list, description="List of preferred colors")
+    vibe: Optional[str] = Field(None, description="Emotional style vibe e.g. minimal, bold, soft")
+    location: Optional[str] = Field(None, description="City or region for weather/context")
 
-class Product(BaseModel):
+class Wardrobeitem(BaseModel):
     """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
+    Smart Closet item
+    Collection: "wardrobeitem"
     """
-    title: str = Field(..., description="Product title")
-    description: Optional[str] = Field(None, description="Product description")
-    price: float = Field(..., ge=0, description="Price in dollars")
-    category: str = Field(..., description="Product category")
-    in_stock: bool = Field(True, description="Whether product is in stock")
+    owner_email: str = Field(..., description="Owner email")
+    name: str = Field(..., description="Item name")
+    category: str = Field(..., description="top, bottom, outerwear, footwear, accessory")
+    color: Optional[str] = Field(None, description="Primary color")
+    size: Optional[str] = Field(None, description="Size label")
+    image_url: Optional[str] = Field(None, description="Image URL")
+    brand: Optional[str] = Field(None, description="Brand name")
+    price: Optional[float] = Field(None, ge=0, description="Price paid")
+    tags: List[str] = Field(default_factory=list, description="Style tags")
+    warmth: Optional[int] = Field(None, ge=0, le=10, description="Warmth score 0-10")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class Outfit(BaseModel):
+    """
+    Outfit generated or suggested
+    Collection: "outfit"
+    """
+    owner_email: str = Field(..., description="Owner email")
+    title: str = Field(..., description="Outfit title")
+    items: List[dict] = Field(default_factory=list, description="List of item snapshots in outfit")
+    mood: Optional[str] = None
+    weather: Optional[str] = None
+    event: Optional[str] = None
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class Challenge(BaseModel):
+    """
+    Community style challenges
+    Collection: "challenge"
+    """
+    title: str
+    prompt: str
+    reward_points: int = 50
